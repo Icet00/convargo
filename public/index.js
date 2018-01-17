@@ -143,6 +143,7 @@ const actors = [{
     'amount': 0
   }]
 }];
+
 window.onload = function()
 {
   for(var i = 0; i < deliveries.length;i++)
@@ -171,16 +172,42 @@ window.onload = function()
     console.log(price)
     //Step 3
     deliveries[i].price = price;
-    deliveries[i].commission.insurance = price / 2;
-    price = price /2;
+    var commission_price = price *0.3;
+    price = price *0.7;
+    deliveries[i].commission.insurance = commission_price / 2;
+    commission_price = commission_price / 2;
     deliveries[i].commission.treasury = deliveries[i].distance/500;
-    price -= deliveries[i].distance/500;
-    deliveries[i].commission.convargo = price;
+    commission_price -= deliveries[i].distance/500;
+    deliveries[i].commission.convargo = commission_price;
     console.log(deliveries[i].commission)
     //Step 4
     if(deliveries[i].options.deductibleReduction)
     {
       deliveries[i].commission.convargo += deliveries[i].volume;
+      deliveries[i].price += deliveries[i].volume;
     }
+
+    //Step 5
+    /*- **the shipper** must pay the **shipping price** and the **(optional) deductible reduction**
+- **the trucker** receives the **shipping price** minus the **commission**
+- **the insurance** receives its part of the **commission**
+- **the Treasury** receives its part of the tax **commission**
+- **convargo receives** its part of the **commission**, plus the **deductible reduction***/
+    var actor = actors.find(function(element) {
+        return element.deliveryId == deliveries[i].id;
+    });
+    //shipper
+    actor.payment[0].amount = deliveries[i].price;
+    var commission = deliveries[i].commission.insurance + deliveries[i].commission.treasury + deliveries[i].commission.convargo;
+    //trucker
+    actor.payment[1].amount = deliveries[i].price - commission;
+    //treasury
+    actor.payment[2].amount = deliveries[i].commission.treasury;
+    //insurance
+    actor.payment[3].amount = deliveries[i].commission.insurance;
+    //convargo
+    actor.payment[4].amount = deliveries[i].commission.convargo;
+
+    console.log(actor);
   }
 }
