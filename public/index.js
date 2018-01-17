@@ -198,8 +198,8 @@ function CalculateComission(index, price)
   var commission_price = price *0.3;
   deliveries[index].commission.insurance = commission_price / 2;
   commission_price = commission_price / 2;
-  deliveries[index].commission.treasury = deliveries[index].distance/500;
-  commission_price -= deliveries[index].distance/500;
+  deliveries[index].commission.treasury = Math.floor(deliveries[index].distance/500) +1;
+  commission_price -= Math.floor(deliveries[index].distance/500) +1;
   deliveries[index].commission.convargo = commission_price;
   console.log(deliveries[index].commission)
 
