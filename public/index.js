@@ -147,10 +147,25 @@ window.onload = function()
 {
   for(var i = 0; i < deliveries.length;i++)
   {
+    var price = 0;
     var truck = truckers.find(function(element) {
         return element.id == deliveries[i].truckerId;
     });
-    var price = (deliveries[i].distance * truck.pricePerKm) + (deliveries[i].volume * truck.pricePerVolume);
+    var distance_price = deliveries[i].distance * truck.pricePerKm;
+    var volume_price = deliveries[i].volume * truck.pricePerVolume;
+    if(deliveries[i].volume >= 5 && deliveries[i].volume < 10)
+    {
+      volume_price = volume_price * 0.9;
+    }
+    else if(deliveries[i].volume >= 10 && deliveries[i].volume < 20)
+    {
+      volume_price = volume_price * 0.7;
+    }
+    else if(deliveries[i].volume > 20)
+    {
+      volume_price = volume_price * 0.5;
+    }
+    price = distance_price + volume_price;
     console.log(price)
     deliveries[i].price = price;
   }
