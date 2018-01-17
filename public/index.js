@@ -149,65 +149,83 @@ window.onload = function()
   for(var i = 0; i < deliveries.length;i++)
   {
     //Step 1
-    var price = 0;
-    var truck = truckers.find(function(element) {
-        return element.id == deliveries[i].truckerId;
-    });
-    var distance_price = deliveries[i].distance * truck.pricePerKm;
-    var volume_price = deliveries[i].volume * truck.pricePerVolume;
-    //Step 2
-    if(deliveries[i].volume >= 5 && deliveries[i].volume < 10)
-    {
-      volume_price = volume_price * 0.9;
-    }
-    else if(deliveries[i].volume >= 10 && deliveries[i].volume < 20)
-    {
-      volume_price = volume_price * 0.7;
-    }
-    else if(deliveries[i].volume > 20)
-    {
-      volume_price = volume_price * 0.5;
-    }
-    price = distance_price + volume_price;
+    var truck = FindTrunk(i);
+
+    //step 2
+    var price = CalculatePrice(i, truck);
+
     console.log(price)
-    //Step 3
-    deliveries[i].price = price;
-    var commission_price = price *0.3;
-    price = price *0.7;
-    deliveries[i].commission.insurance = commission_price / 2;
-    commission_price = commission_price / 2;
-    deliveries[i].commission.treasury = deliveries[i].distance/500;
-    commission_price -= deliveries[i].distance/500;
-    deliveries[i].commission.convargo = commission_price;
-    console.log(deliveries[i].commission)
-    //Step 4
-    if(deliveries[i].options.deductibleReduction)
-    {
-      deliveries[i].commission.convargo += deliveries[i].volume;
-      deliveries[i].price += deliveries[i].volume;
-    }
+    //Step 3 and 4
+    CalculateComission(i, price);
 
     //Step 5
-    /*- **the shipper** must pay the **shipping price** and the **(optional) deductible reduction**
-- **the trucker** receives the **shipping price** minus the **commission**
-- **the insurance** receives its part of the **commission**
-- **the Treasury** receives its part of the tax **commission**
-- **convargo receives** its part of the **commission**, plus the **deductible reduction***/
-    var actor = actors.find(function(element) {
-        return element.deliveryId == deliveries[i].id;
-    });
-    //shipper
-    actor.payment[0].amount = deliveries[i].price;
-    var commission = deliveries[i].commission.insurance + deliveries[i].commission.treasury + deliveries[i].commission.convargo;
-    //trucker
-    actor.payment[1].amount = deliveries[i].price - commission;
-    //treasury
-    actor.payment[2].amount = deliveries[i].commission.treasury;
-    //insurance
-    actor.payment[3].amount = deliveries[i].commission.insurance;
-    //convargo
-    actor.payment[4].amount = deliveries[i].commission.convargo;
-
-    console.log(actor);
+    StorePriceAndCommission(i);
   }
+}
+
+function FindTrunk(index)
+{
+    return truckers.find(function(element) {
+        return element.id == deliveries[index].truckerId;
+    });
+}
+
+function CalculatePrice(index, truck)
+{
+  var price = 0;
+  var distance_price = deliveries[index].distance * truck.pricePerKm;
+  var volume_price = deliveries[index].volume * truck.pricePerVolume;
+  if(deliveries[index].volume >= 5 && deliveries[index].volume < 10)
+  {
+    volume_price = volume_price * 0.9;
+  }
+  else if(deliveries[index].volume >= 10 && deliveries[index].volume < 20)
+  {
+    volume_price = volume_price * 0.7;
+  }
+  else if(deliveries[index].volume > 20)
+  {
+    volume_price = volume_price * 0.5;
+  }
+  price = distance_price + volume_price;
+  deliveries[index].price = price;
+  return price;
+}
+
+function CalculateComission(index, price)
+{
+  //step 3
+  var commission_price = price *0.3;
+  deliveries[index].commission.insurance = commission_price / 2;
+  commission_price = commission_price / 2;
+  deliveries[index].commission.treasury = deliveries[index].distance/500;
+  commission_price -= deliveries[index].distance/500;
+  deliveries[index].commission.convargo = commission_price;
+  console.log(deliveries[index].commission)
+
+  //Step 4
+    if(deliveries[index].options.deductibleReduction)
+    {
+      deliveries[index].commission.convargo += deliveries[index].volume;
+      deliveries[index].price += deliveries[index].volume;
+    }
+}
+
+function StorePriceAndCommission(index)
+{
+  var actor = actors.find(function(element) {
+      return element.deliveryId == deliveries[index].id;
+  });
+  //shipper
+  actor.payment[0].amount = deliveries[index].price;
+  var commission = deliveries[index].commission.insurance + deliveries[index].commission.treasury + deliveries[index].commission.convargo;
+  //trucker
+  actor.payment[1].amount = deliveries[index].price - commission;
+  //treasury
+  actor.payment[2].amount = deliveries[index].commission.treasury;
+  //insurance
+  actor.payment[3].amount = deliveries[index].commission.insurance;
+  //convargo
+  actor.payment[4].amount = deliveries[index].commission.convargo;
+  console.log(actor);
 }
