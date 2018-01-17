@@ -147,12 +147,14 @@ window.onload = function()
 {
   for(var i = 0; i < deliveries.length;i++)
   {
+    //Step 1
     var price = 0;
     var truck = truckers.find(function(element) {
         return element.id == deliveries[i].truckerId;
     });
     var distance_price = deliveries[i].distance * truck.pricePerKm;
     var volume_price = deliveries[i].volume * truck.pricePerVolume;
+    //Step 2
     if(deliveries[i].volume >= 5 && deliveries[i].volume < 10)
     {
       volume_price = volume_price * 0.9;
@@ -167,6 +169,7 @@ window.onload = function()
     }
     price = distance_price + volume_price;
     console.log(price)
+    //Step 3
     deliveries[i].price = price;
     deliveries[i].commission.insurance = price / 2;
     price = price /2;
@@ -174,5 +177,10 @@ window.onload = function()
     price -= deliveries[i].distance/500;
     deliveries[i].commission.convargo = price;
     console.log(deliveries[i].commission)
+    //Step 4
+    if(deliveries[i].options.deductibleReduction)
+    {
+      deliveries[i].commission.convargo += deliveries[i].volume;
+    }
   }
 }
