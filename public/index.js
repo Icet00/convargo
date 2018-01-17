@@ -168,5 +168,11 @@ window.onload = function()
     price = distance_price + volume_price;
     console.log(price)
     deliveries[i].price = price;
+    deliveries[i].commission.insurance = price / 2;
+    price = price /2;
+    deliveries[i].commission.treasury = deliveries[i].distance/500;
+    price -= deliveries[i].distance/500;
+    deliveries[i].commission.convargo = price;
+    console.log(deliveries[i].commission)
   }
 }
